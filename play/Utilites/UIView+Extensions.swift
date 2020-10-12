@@ -10,8 +10,13 @@ import Foundation
 import UIKit
 
 extension UIColor {
-    static func rgb(red: CGFloat, green: CGFloat, blue: CGFloat) -> UIColor {
-        return UIColor(red: red / 255, green: green / 255, blue: blue / 255, alpha: 1)
+    convenience init(rgb: UInt) {
+        self.init(
+            red: CGFloat((rgb & 0xFF0000) >> 16) / 255.0,
+            green: CGFloat((rgb & 0x00FF00) >> 8) / 255.0,
+            blue: CGFloat(rgb & 0x0000FF) / 255.0,
+            alpha: CGFloat(1.0)
+        )
     }
 }
 
@@ -113,6 +118,23 @@ extension UIView {
         }
         if size.height != 0 {
             heightAnchor.constraint(equalToConstant: size.height).isActive = true
+        }
+    }
+}
+extension UIImageView {
+    func load(url: String) {
+        guard let url = URL(string: url) else {
+            assertionFailure("URL String is Invalid")
+            return
+        }
+        DispatchQueue.global().async { [weak self] in
+            if let data = try? Data(contentsOf: url) {
+                if let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self?.image = image
+                    }
+                }
+            }
         }
     }
 }
