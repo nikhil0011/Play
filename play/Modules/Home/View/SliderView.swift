@@ -7,52 +7,57 @@
 //
 
 import UIKit
-
-class SliderView: UIView {
+final class SliderView: UIView {
     private lazy var scrollView = UIScrollView.create {
         $0.translatesAutoresizingMaskIntoConstraints = false
-        $0.backgroundColor = .red
+        $0.backgroundColor = .lightGray
         $0.delegate = self
-        $0.showsVerticalScrollIndicator = true
+        $0.isScrollEnabled = true
+        $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = true
     }
     private lazy var contentView = UIView.create {
         $0.translatesAutoresizingMaskIntoConstraints = false
         $0.backgroundColor = .clear
-        $0.isHidden = true
     }
     private lazy var pageControl = UIPageControl.create {
         $0.translatesAutoresizingMaskIntoConstraints = false
         $0.currentPage = 0
         $0.pageIndicatorTintColor = .blue
         $0.addTarget(self, action: #selector(didTapOnPageControl), for: .touchUpInside)
-        $0.currentPageIndicatorTintColor = .white
+        $0.currentPageIndicatorTintColor = .gray
     }
-    override func draw(_ rect: CGRect) {
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         setupView()
     }
+    required init?(coder: NSCoder) {
+        fatalError()
+    }
     func setupView() {
-        addSubview(contentView)
+        self.addSubview(contentView)
         contentView.bounds = self.bounds
-        contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        contentView.addSubview(scrollView)
-        contentView.addSubview(pageControl)
-        scrollView.fillSuperview()
+        contentView.autoresizingMask = [.flexibleWidth,
+                                        .flexibleHeight]
+        contentView.addSubviews(scrollView, pageControl)
+        scrollView.anchor(top: topAnchor, leading: leadingAnchor, bottom: bottomAnchor, trailing: trailingAnchor, padding: .zero, size: .init(width: 325, height: 200))
         pageControl.anchor(top: nil, leading: nil, bottom: bottomAnchor, trailing: nil, padding: .init(top: 0, left: 0, bottom: 8, right: 0))
-        pageControl.centerXAnchor.constraint(equalTo: self.contentView.centerXAnchor).isActive = true
+        pageControl.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
     }
     func configure(_ images: [String]) {
-        let containerWidth = self.scrollView.frame.width
-        let containerHeight = self.scrollView.frame.height
+        let containerWidth = 325.0
+        let containerHeight = 200.0
+        print("Container Height \(containerHeight)")
+        print("Container width \(containerWidth)")
         for (index, url) in images.enumerated() {
-            let imageview = UIImageView(frame: CGRect(x: containerWidth * CGFloat(index),
+            let imageview = UIImageView(frame: CGRect(x: containerWidth * Double(CGFloat(index)),
                                                       y: 0, width: containerWidth, height: containerHeight))
             imageview.load(url: url)
             imageview.contentMode = .scaleAspectFill
             imageview.clipsToBounds = true
             scrollView.addSubview(imageview)
         }
-        scrollView.contentSize = CGSize(width: containerWidth * CGFloat(images.count), height: containerHeight)
+        scrollView.contentSize = CGSize(width: containerWidth * Double(CGFloat(images.count)), height: containerHeight)
         pageControl.numberOfPages = images.count
     }
     @objc func didTapOnPageControl(sender: UIPageControl?) {
